@@ -29,11 +29,47 @@ const signupfun=async(req, res)=>{
         msg: "signup created successfully",
         token:token
      })
+}
 
+const signinBody=zod.object({
+    username:zod.string().email(),
+    password: zod.string()
+});
+
+const signinfun=async(req, res)=>{
+
+    try {
+        const {username}=req.body;
+      if(!username){
+        return res.status(401).json({
+            msg: "username or password is invalid"
+        })
+      }
+
+      const user=await User.findOne({
+          username:req.body.username,
+          password: req.body.password
+      });
+
+      if(user){
+          const token=jwt.sign({
+            userId: user._id
+          },JWT_SECRET);
+          res.json({
+              msg: "login successfully",
+              token: token
+          });
+          return
+      } 
+    } catch (error) {
+        console.log(`somthing went wron ${error}`)
+    }
+     
 
 
 }
 
 module.exports={
-   signupfun
+   signupfun, 
+   signinfun
 }
